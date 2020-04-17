@@ -38,9 +38,15 @@ traversal_path = []
 # print('get exits after moving', player.current_room.get_exits())
 
 
+# fn to convert room ids to directions in bfs
+def convert(adjacency_dict, next_room):
+    for direction, id in adjacency_dict.items():
+        if id == next_room:
+            return direction
+
 graph = {}
 
-room_count = 1
+room_count = 0
 
 curr_room = 0
 prev_room = None
@@ -59,7 +65,7 @@ while room_count < 9:
     while True:
         # when visiting each room
         # if room is not already in the graph, add it and increment room_count
-        if not player.current_room.id in graph:
+        if not curr_room in graph:
             graph[player.current_room.id] = {i: '?' for i in player.current_room.get_exits()}
             room_count += 1
         # if it is
@@ -68,7 +74,7 @@ while room_count < 9:
             if '?' in graph[player.current_room.id].values():
                 # pick one, add exit to traversal_path
                 choice = random.choice(list(graph[player.current_room.id].keys()))
-                while choice != '?':
+                while graph[player.current_room.id][choice] != '?':
                     choice = random.choice(list(graph[player.current_room.id].keys()))
                 prev_room = curr_room
                 player.travel(choice)
@@ -78,19 +84,58 @@ while room_count < 9:
                     traversal_path.append(choice)
                     # set adjacency values
                     graph[prev_room][choice] = curr_room
+                    # if room is not already in the graph, add it and increment room_count
+                    if not curr_room in graph:
+                        graph[player.current_room.id] = {i: '?' for i in player.current_room.get_exits()}
+                        room_count += 1
                     graph[curr_room][opposite[choice]] = prev_room
                 else:
                     graph[curr_room][choice] = 'x'
 
             # if no unvisited exits, go to next loop
             else:
+                proceed = True
                 break
 
 
-        # if no unvisited exits
+    
     # do a bfs for the nearest room with an unvisited exit
     # once the room is found, append the path to get to it to traversal path
-    # resume checking for/visiting unvisited exits
+    proceed = True
+    while proceed:
+        # create queue and enqueue current_room
+        queue = Queue()
+        queue.enqueue([curr_room])
+        # create visited set
+        visited = set()
+        # while queue not not empty
+        while queue.size() > 0:
+            # dequeue path
+            path = queue.dequeue()
+            path_directions = []
+            # if last room in path has unvisited exit
+            print('asdf', graph[path[-1]].values())
+            if '?' in graph[path[-1]].values():
+                # convert room ids into path directions
+                for i in range(len(path)):
+                    path_directions.append(convert(graph[curr_room], path[i]))
+                    curr_room = path[i]
+                traversal_path = traversal_path + path_directions[1:]
+                proceed = False
+                break
+            # if room not in visited
+            if not path[-1] in visited:
+                # add it
+                visited.add(path[-1])
+            # enqueue this rooms exits
+            for exit in graph[path[-1]].values():
+                if exit != '?' and exit not in visited:
+                    # create copy of path
+                    new_path = list(path)
+                    # add neighbor to it
+                    new_path.append(exit)
+                    # enqueue the new path
+                    queue.enqueue(new_path)
 
 
 # # # populate graph with empty dicts
