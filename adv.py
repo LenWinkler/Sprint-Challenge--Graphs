@@ -13,7 +13,7 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
 # map_file = "maps/main_maze.txt"
@@ -59,7 +59,7 @@ opposite = {
 }
 
 # outer while loop
-while room_count < 9:
+while room_count < 18:
 
     # DFS while loop
     while True:
@@ -103,7 +103,7 @@ while room_count < 9:
     # once the room is found, append the path to get to it to traversal path
     
     while proceed:
-        if room_count == 9:
+        if room_count == 18:
             break
         # create queue and enqueue current_room
         queue = Queue()
