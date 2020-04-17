@@ -16,7 +16,7 @@ world = World()
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -44,6 +44,8 @@ def convert(adjacency_dict, next_room):
         if id == next_room:
             return direction
 
+
+
 graph = {}
 
 room_count = 0
@@ -51,6 +53,8 @@ room_count = 0
 curr_room = 0
 prev_room = None
 
+# used when assigning the id of the room we just came from
+# if we traveled 'n' to get to current room, current room['s'] would be prev room's id
 opposite = {
     'n': 's',
     's': 'n',
@@ -59,11 +63,10 @@ opposite = {
 }
 
 # outer while loop
-while room_count < 18:
+while room_count < 500:
 
     # DFS while loop
     while True:
-        # when visiting each room
         # if room is not already in the graph, add it and increment room_count
         if not curr_room in graph:
             graph[curr_room] = {i: '?' for i in player.current_room.get_exits()}
@@ -79,7 +82,7 @@ while room_count < 18:
                 prev_room = curr_room
                 player.travel(choice)
                 # check if you're in a different room (exit wasn't dead end)
-                curr_room = player.current_room.id # <--- PROBLEM!!!!!
+                curr_room = player.current_room.id
                 if curr_room != prev_room:
                     traversal_path.append(choice)
                     # set adjacency values
@@ -92,18 +95,14 @@ while room_count < 18:
                 else:
                     graph[curr_room][choice] = 'x'
 
-            # if no unvisited exits, go to next loop
+            # if no unvisited exits, go to BFS loop
             else:
                 proceed = True
                 break
 
-
-    
-    # do a bfs for the nearest room with an unvisited exit
-    # once the room is found, append the path to get to it to traversal path
-    
+    # BFS loop
     while proceed:
-        if room_count == 18:
+        if room_count == 500:
             break
         # create queue and enqueue current_room
         queue = Queue()
@@ -134,72 +133,13 @@ while room_count < 18:
                 visited.add(path[-1])
             # enqueue this rooms exits
             for exit in graph[path[-1]].values():
-                if exit != '?' and exit not in visited:
+                if exit not in visited:
                     # create copy of path
                     new_path = list(path)
                     # add neighbor to it
                     new_path.append(exit)
                     # enqueue the new path
                     queue.enqueue(new_path)
-
-
-# # # populate graph with empty dicts
-# # for i in range(0, 3):
-# #     graph[i] = {}
-
-# # vars to track which room we're in
-# curr_room = 0
-# prev_room = 0
-
-# # var to track # of rooms visited
-# number_visited = 1
-
-# # each direction's opposite
-# opposite = {
-#     'n': 's',
-#     's': 'n',
-#     'e': 'w',
-#     'w': 'e'
-# }
-
-# # populate graph
-# while number_visited < len(graph):
-#     curr_room = player.current_room.id
-#     exits = player.current_room.get_exits()
-#     print('curr room', curr_room)
-#     print('exits', exits)
-
-#     exits_dict = {}
-    
-#     # add exits to current room's adjacency dict
-#     for exit in exits:
-#         exits_dict[exit] = '?'
-#     graph[curr_room] = exits_dict
-    
-#     print(graph)
-    
-#     # loop through and pick an unexplored exit
-#     for exit in exits:
-#         # if exit unexplored, go there
-#         if graph[curr_room][exit] == '?':
-#             player.travel(exit)
-#             # make sure we're not in the same room ()
-#             curr_room = player.current_room.id
-#             if curr_room == prev_room:
-#                 graph[curr_room][exit] = 'x'
-#                 continue
-#             else:
-#                 traversal_path.append(exit)
-#                 graph[prev_room][exit] = curr_room
-#                 graph[curr_room][opposite[exit]] = prev_room
-#                 number_visited += 1
-#                 prev_room = curr_room
-#                 exits_dict = {}
-
-# print('graph', graph)
-
-# travel there and log the direction in traversal_path
-
 
 # TRAVERSAL TEST
 visited_rooms = set()
